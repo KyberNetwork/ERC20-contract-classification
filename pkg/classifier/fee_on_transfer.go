@@ -4,6 +4,7 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
 
 	"erc20-contract-classification/pkg/classifier/jsonrpc"
@@ -16,9 +17,19 @@ type TxFromTransferEvent struct {
 	TxHash       common.Hash
 	Amount       *big.Int
 }
+
 type Classifier struct {
-	probe  *Probe
-	client *rpc.Client
+	probe     *Probe
+	client    *rpc.Client
+	ethClient *ethclient.Client
+}
+
+func NewClassifier(rpcClient *rpc.Client, erc20balanceSlotProbe *Probe) *Classifier {
+	return &Classifier{
+		probe:     erc20balanceSlotProbe,
+		client:    rpcClient,
+		ethClient: ethclient.NewClient(rpcClient),
+	}
 }
 
 type BalanceDiff struct {
@@ -63,7 +74,7 @@ func (c *Classifier) ReadSlotStorage(txs []*TxFromTransferEvent) (balanceSlot ma
 
 func (c *Classifier) TraceCallAndGetBalance(txs []*TxFromTransferEvent, balanceSlotMap map[common.Address]common.Hash) {
 	var (
-		result = make(map[common.Hash]*StateChanges, len(txs))
+		results = make(map[common.Hash]*StateChanges, len(txs))
 	)
 	for _, tx := range txs {
 		var result interface{}
@@ -76,7 +87,7 @@ func (c *Classifier) TraceCallAndGetBalance(txs []*TxFromTransferEvent, balanceS
 			logger.Warnw("failed to to call json rpc ")
 		}
 		// TODO: print out all state diffs based on balanceSlotMap in the form BalanceDiff
-		result[tx.TxHash] = StateChanges{
+		results[tx.TxHash] = &StateChanges{
 			Contract: nil,
 			From:     nil,
 			To:       nil,

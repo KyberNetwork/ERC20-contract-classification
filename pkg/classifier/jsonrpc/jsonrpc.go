@@ -1,6 +1,8 @@
 package jsonrpc
 
 import (
+	"encoding/json"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/rpc"
@@ -10,7 +12,7 @@ import (
 type EthCallCalldataParam struct {
 	From string `json:"from"`
 	To   string `json:"to"`
-	Gas  string `json:"gas"`
+	Gas  string `json:"gas,omitempty"`
 	Data string `json:"data"`
 }
 
@@ -32,13 +34,14 @@ func EthCall(client *rpc.Client, calldata *EthCallCalldataParam, blockNumber str
 type DebugTraceCallCalldataParam struct {
 	From string `json:"from"`
 	To   string `json:"to"`
-	Gas  string `json:"gas"`
+	Gas  string `json:"gas,omitempty"`
 	Data string `json:"data"`
 }
 
 // DebugTraceCallTracerConfigParam debug_traceCall's tracer config param
 type DebugTraceCallTracerConfigParam struct {
-	Tracer string `json:"tracer"`
+	Tracer       string          `json:"tracer"`
+	TracerConfig json.RawMessage `json:"tracerConfig"`
 }
 
 // DebugTraceCall debug_traceCall wrapper
