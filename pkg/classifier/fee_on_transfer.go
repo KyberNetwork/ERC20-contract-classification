@@ -80,7 +80,8 @@ func (c *Classifier) TraceCallAndGetBalance(txs []*TxFromTransferEvent, balanceS
 		var result interface{}
 		err := jsonrpc.DebugTraceTransaction(
 			c.client,
-			&jsonrpc.DebugTraceTransactionParam{TxHash: tx.TxHash.String()},
+			tx.TxHash,
+			nil,
 			result,
 		)
 		if err != nil {

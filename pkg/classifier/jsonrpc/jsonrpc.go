@@ -56,10 +56,6 @@ func DebugTraceCall(
 	return err
 }
 
-type DebugTraceTransactionParam struct {
-	TxHash string `json:"txHash"`
-}
-
 //type DebugTraceTransactionConfigParam struct {
 //	disableStorage   bool   `json:"disableStorage"`
 //	disableStack     bool   `json:"disableStack"`
@@ -70,10 +66,11 @@ type DebugTraceTransactionParam struct {
 
 func DebugTraceTransaction(
 	client *rpc.Client,
-	debugTraceTxParam *DebugTraceTransactionParam,
+	txHash common.Hash,
+	tracer *DebugTraceCallTracerConfigParam,
 	result interface{},
 ) error {
-	return client.Call(result, "debug_traceTransaction", debugTraceTxParam)
+	return client.Call(result, "debug_traceTransaction", txHash, tracer)
 }
 
 // OverrideAccount similar to ethapi.OverrideAccount
@@ -87,3 +84,26 @@ type OverrideAccount struct {
 
 // StateOverride similar to ethapi.StateOverride
 type StateOverride = map[common.Address]OverrideAccount
+
+// CallLog similar to eth/tracers/native.callLog
+type CallLog struct {
+	Address common.Address `json:"address"`
+	Topics  []common.Hash  `json:"topics"`
+	Data    hexutil.Bytes  `json:"data"`
+}
+
+// CallFrame similar to eth/tracers/native.callFrame
+type CallFrame struct {
+	Type         string          `json:"type"`
+	From         common.Address  `json:"from"`
+	Gas          hexutil.Uint64  `json:"gas"`
+	GasUsed      hexutil.Uint64  `json:"gasUsed"`
+	To           *common.Address `json:"to,omitempty"`
+	Input        hexutil.Bytes   `json:"input"`
+	Output       hexutil.Bytes   `json:"output,omitempty"`
+	Error        string          `json:"error,omitempty"`
+	RevertReason string          `json:"revertReason,omitempty"`
+	Calls        []CallFrame     `json:"calls,omitempty"`
+	Logs         []CallLog       `json:"logs,omitempty"`
+	Value        *hexutil.Big    `json:"value,omitempty"`
+}
