@@ -3,6 +3,7 @@ package classifier
 import (
 	"errors"
 	"math/rand"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -19,6 +20,11 @@ func randomizeHash() common.Hash {
 		h[i] = byte(rand.Intn(256))
 	}
 	return h
+}
+
+// fix "invalid argument 2: hex number with leading zero digits" error
+func removeLeadingZerosFromHash(h common.Hash) string {
+	return "0x" + strings.TrimLeft(strings.TrimPrefix(h.Hex(), "0x"), "0")
 }
 
 const (
@@ -103,8 +109,8 @@ func (p *Probe) ProbeBalanceSlot(token common.Address) (common.Hash, error) {
 			"latest",
 			map[common.Address]jsonrpc.OverrideAccount{
 				token: {
-					StateDiff: map[common.Hash]common.Hash{
-						common.HexToHash(sload.Slot): testValue,
+					StateDiff: map[common.Hash]string{
+						common.HexToHash(sload.Slot): removeLeadingZerosFromHash(testValue),
 					},
 				},
 			},
