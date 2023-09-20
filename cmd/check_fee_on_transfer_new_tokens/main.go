@@ -104,22 +104,32 @@ func main() {
 
 	// don't need erc20BalanceSlotProbe
 	clz := classifier.NewClassifier(rpcClient, nil)
-	var i int
+
+	outputFile, err := os.Create("output.csv")
+	if err != nil {
+		panic(err)
+	}
+	defer outputFile.Close()
+	writer := gocsv.DefaultCSVWriter(outputFile)
+
 	for token := range tokens {
 		fot, err := clz.IsFeeOnTransferNewToken(token, scenarios)
 		if err != nil {
 			fmt.Printf("%s\n", err)
 		}
 		if err != nil {
+			writer.Write([]string{token.String(), "could not decide"})
 			continue
 		}
 		if fot {
 			fmt.Printf("    token %s is fee-on-transfer\n", token)
+			writer.Write([]string{token.String(), "fot"})
 		} else {
 			fmt.Printf("    token %s is NOT fee-on-transfer\n", token)
+			writer.Write([]string{token.String(), "not fot"})
 		}
-		i++
 	}
+	writer.Flush()
 }
 
 func fetchOrGetCachedTransactions(ethClient *ethclient.Client, txHashes map[common.Hash]struct{}) (map[common.Hash]*types.Transaction, error) {
