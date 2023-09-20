@@ -11,15 +11,8 @@ import (
 	"github.com/ethereum/go-ethereum/rpc"
 
 	"erc20-contract-classification/pkg/classifier/jsonrpc"
+	"erc20-contract-classification/pkg/types"
 )
-
-type TxFromTransferEvent struct {
-	From         common.Address
-	To           common.Address
-	ContractAddr common.Address
-	TxHash       common.Hash
-	Amount       *big.Int
-}
 
 type Classifier struct {
 	probe     *Probe
@@ -53,13 +46,13 @@ func getTxsWithTransferLog(contract common.Address) {
 
 }
 
-func (c *Classifier) ReadSlotStorage(txs []*TxFromTransferEvent) (balanceSlot map[common.Address]common.Hash) {
+func (c *Classifier) ReadSlotStorage(txs []*types.TxFromTransferEvent, contractAddr common.Address) (balanceSlot map[common.Address]common.Hash) {
 	var (
 		balanceSlotMap map[common.Address]common.Hash
 	)
+	balanceSlotMap[contractAddr] = common.Hash{}
 
 	for _, t := range txs {
-		balanceSlotMap[t.ContractAddr] = common.Hash{}
 		balanceSlotMap[t.From] = common.Hash{}
 		balanceSlotMap[t.To] = common.Hash{}
 	}
@@ -75,7 +68,7 @@ func (c *Classifier) ReadSlotStorage(txs []*TxFromTransferEvent) (balanceSlot ma
 	return balanceSlotMap
 }
 
-func (c *Classifier) TraceCallAndGetBalance(contractAddress common.Address, txs []*TxFromTransferEvent, balanceSlotMap map[common.Address]common.Hash) (map[common.Hash]*StateChanges, error) {
+func (c *Classifier) TraceCallAndGetBalance(contractAddress common.Address, txs []*types.TxFromTransferEvent, balanceSlotMap map[common.Address]common.Hash) (map[common.Hash]*StateChanges, error) {
 	var (
 		results = make(map[common.Hash]*StateChanges, len(txs))
 	)

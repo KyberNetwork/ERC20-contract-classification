@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/ethereum/go-ethereum v1.11.6
+	github.com/gocarina/gocsv v0.0.0-20230616125104-99d496ca653d
 	github.com/stretchr/testify v1.8.3
 	github.com/tdewolff/minify/v2 v2.12.9
 	go.uber.org/zap v1.24.0
@@ -17,7 +18,6 @@ require (
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1 // indirect
 	github.com/go-ole/go-ole v1.2.1 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect
-	github.com/gocarina/gocsv v0.0.0-20230616125104-99d496ca653d // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/holiman/uint256 v1.2.2-0.20230321075855-87b91420868c // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
