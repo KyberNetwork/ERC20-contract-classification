@@ -84,7 +84,7 @@ func (c *Classifier) getActualBalanceReceivedAfterTransfer(scenario *TransferSce
 	}
 
 	// make sure the tranfer tx is success
-	_, err = c.ethClient.CallContract(
+	success, err := c.ethClient.CallContract(
 		context.Background(),
 		ethereum.CallMsg{
 			From: scenario.MsgSender,
@@ -95,6 +95,9 @@ func (c *Classifier) getActualBalanceReceivedAfterTransfer(scenario *TransferSce
 	)
 	if err != nil {
 		return nil, fmt.Errorf("could not eth_call: %w", err)
+	}
+	if new(big.Int).SetBytes(success).Cmp(big.NewInt(1)) != 0 {
+		return nil, fmt.Errorf("transfer not success")
 	}
 
 	transferTraceResult := new(prestateTracerResult)
