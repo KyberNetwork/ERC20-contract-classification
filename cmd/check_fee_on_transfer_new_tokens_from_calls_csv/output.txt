@@ -1,0 +1,16 @@
+checking token 0x04C17b9D3b29A78F7Bd062a57CF44FC633e71f85
+numScenarios = 10000
+    numEqual = 5372, numLess = 0
+    token 0x04C17b9D3b29A78F7Bd062a57CF44FC633e71f85 is NOT fee-on-transfer
+checking token 0x9b0E1C344141fB361B842d397dF07174E1CDb988
+numScenarios = 10000
+    numEqual = 4853, numLess = 3469
+    token 0x9b0E1C344141fB361B842d397dF07174E1CDb988 is fee-on-transfer
+checking token 0x6580685617A8721dF77Ca42A08E7B1d58dA79CF9
+numScenarios = 644
+    numEqual = 1, numLess = 502
+    token 0x6580685617A8721dF77Ca42A08E7B1d58dA79CF9 is fee-on-transfer
+checking token 0xE4aB0bE415e277d82C38625B72BD7DeA232C2E7d
+numScenarios = 10000
+    numEqual = 5753, numLess = 3015
+    token 0xE4aB0bE415e277d82C38625B72BD7DeA232C2E7d is fee-on-transfer
