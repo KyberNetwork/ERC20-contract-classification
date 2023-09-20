@@ -2,26 +2,20 @@ package main
 
 import (
 	"encoding/json"
-	"erc20-contract-classification/pkg/classifier/jsonrpc"
 	"fmt"
-	"math/big"
 	"os"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/gocarina/gocsv"
+
+	"erc20-contract-classification/pkg/classifier/data"
+	"erc20-contract-classification/pkg/classifier/jsonrpc"
 )
 
 const (
 	rpcURL = "http://localhost:8545" // CHANGE ME
 )
-
-type TransferRecord struct {
-	Sender      common.Address `csv:"sender_address"`
-	Receiver    common.Address `csv:"receiver_address"`
-	TxHash      common.Hash    `csv:"tx_hash"`
-	TotalAmount *big.Int       `csv:"total_tokens_transferred"`
-}
 
 func main() {
 	in, err := os.Open("erc20_transfer_tx.csv")
@@ -37,7 +31,7 @@ func main() {
 	// ethClient := ethclient.NewClient(rpcClient)
 
 	var (
-		transfers []*TransferRecord
+		transfers []*data.TransferRecord
 		txHashes  = make(map[common.Hash]struct{})
 		// txs        = make(map[common.Hash]*types.Transaction)
 		// receipts   = make(map[common.Hash]*types.Receipt)
