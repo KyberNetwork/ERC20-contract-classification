@@ -35,6 +35,7 @@ type DebugTraceCallCalldataParam struct {
 	From                 string `json:"from"`
 	To                   string `json:"to"`
 	Gas                  string `json:"gas,omitempty"`
+	GasPrice             string `json:"gasPrice,omitempty"`
 	MaxFeePerGas         string `json:"maxFeePerGas,omitempty"`
 	MaxPriorityFeePerGas string `json:"maxPriorityFeePerGas,omitempty"`
 	Data                 string `json:"data"`

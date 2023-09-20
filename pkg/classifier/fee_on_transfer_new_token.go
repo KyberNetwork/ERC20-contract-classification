@@ -29,6 +29,7 @@ type TransferScenario struct {
 	// block number to call/trace on
 	BlockNumber string `json:"blockNumber"`
 	// Gas for tracing call
+	GasPrice  *big.Int `json:"gasPrice"`
 	GasFeeCap *big.Int `json:"gasFeeCap"`
 	GasTipCap *big.Int `json:"gasTipCap"`
 }
@@ -102,22 +103,29 @@ func (c *Classifier) getActualBalanceReceivedAfterTransfer(scenario *TransferSce
 	}
 	transferTracerConfigEncoded, _ := json.Marshal(transferTracerConfig)
 	// some tracing fails if we don't specify maxFeePerGas and maxPriorityFeePerGas
-	var maxFeePerGas string
-	if scenario.GasFeeCap != nil {
+	var (
+		gasPrice             string
+		maxFeePerGas         string
+		maxPriorityFeePerGas string
+	)
+	if scenario.GasFeeCap != nil && scenario.GasFeeCap.Cmp(big.NewInt(0)) != 0 {
 		c := new(big.Int).Mul(scenario.GasFeeCap, big.NewInt(150))
 		c = c.Div(c, big.NewInt(100))
 		maxFeePerGas = hexutil.EncodeBig(c)
-	}
-	var maxPriorityFeePerGas string
-	if scenario.GasTipCap != nil {
-		c := new(big.Int).Mul(scenario.GasTipCap, big.NewInt(150))
-		c = c.Div(c, big.NewInt(100))
-		maxPriorityFeePerGas = hexutil.EncodeBig(c)
+
+		if scenario.GasTipCap != nil {
+			c := new(big.Int).Mul(scenario.GasTipCap, big.NewInt(150))
+			c = c.Div(c, big.NewInt(100))
+			maxPriorityFeePerGas = hexutil.EncodeBig(c)
+		}
+	} else {
+		gasPrice = hexutil.EncodeBig(scenario.GasPrice)
 	}
 	err = jsonrpc.DebugTraceCall(
 		c.client,
 		&jsonrpc.DebugTraceCallCalldataParam{
 			From:                 scenario.MsgSender.String(),
+			GasPrice:             gasPrice,
 			MaxFeePerGas:         maxFeePerGas,
 			MaxPriorityFeePerGas: maxPriorityFeePerGas,
 			To:                   scenario.Token.String(),
