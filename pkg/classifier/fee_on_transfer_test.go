@@ -8,6 +8,18 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/stretchr/testify/assert"
+
+	"erc20-contract-classification/pkg/classifier/data"
+	"erc20-contract-classification/pkg/types"
+)
+
+const (
+	rpcURL   = "https://bitter-distinguished-pool.quiknode.pro/0857d66be8c205ec410c3fdb91eb0d11c744531e/" // CHANGE ME
+	csv_file = "erc20_transfer_tx.csv"
+)
+
+var (
+	contractAddress = common.HexToAddress("0x36e6309aa7a923fb111ae50b56bfb3cfb2256f89")
 )
 
 func TestClassifier_TraceCallAndGetBalance(t *testing.T) {
@@ -18,9 +30,11 @@ func TestClassifier_TraceCallAndGetBalance(t *testing.T) {
 	}
 	type args struct {
 		contractAddress common.Address
-		txs             []*TxFromTransferEvent
+		txs             []*types.TxFromTransferEvent
 		balanceSlotMap  map[common.Address]common.Hash
 	}
+	input, err := data.ReadDataFromCSV(csv_file, contractAddress)
+	assert.NoError(t, err)
 	tests := []struct {
 		name    string
 		fields  fields
