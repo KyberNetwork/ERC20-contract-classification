@@ -231,6 +231,10 @@ func (c *Classifier) getActualBalanceReceivedAfterTransfer(scenario *TransferSce
 	}
 	balanceAfterTransfer = new(big.Int).SetBytes(decoded)
 
+	if balanceAfterTransfer.Cmp(balanceBeforeTransfer) < 0 {
+		return nil, fmt.Errorf("balance after transfer is less than balance before transfer")
+	}
+
 	// the actual amount received is the different between balance after and balance before
 	actualAmount := new(big.Int).Sub(balanceAfterTransfer, balanceBeforeTransfer)
 	return actualAmount, nil
