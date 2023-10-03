@@ -32,16 +32,20 @@ func EthCall(client *rpc.Client, calldata *EthCallCalldataParam, blockNumber str
 
 // DebugTraceCallCalldataParam debug_traceCall's calldata param
 type DebugTraceCallCalldataParam struct {
-	From string `json:"from"`
-	To   string `json:"to"`
-	Gas  string `json:"gas,omitempty"`
-	Data string `json:"data"`
+	From                 string `json:"from"`
+	To                   string `json:"to"`
+	Gas                  string `json:"gas,omitempty"`
+	GasPrice             string `json:"gasPrice,omitempty"`
+	MaxFeePerGas         string `json:"maxFeePerGas,omitempty"`
+	MaxPriorityFeePerGas string `json:"maxPriorityFeePerGas,omitempty"`
+	Data                 string `json:"data"`
 }
 
 // DebugTraceCallTracerConfigParam debug_traceCall's tracer config param
 type DebugTraceCallTracerConfigParam struct {
-	Tracer       string          `json:"tracer"`
-	TracerConfig json.RawMessage `json:"tracerConfig"`
+	Tracer         string                             `json:"tracer"`
+	TracerConfig   json.RawMessage                    `json:"tracerConfig"`
+	StateOverrides map[common.Address]OverrideAccount `json:"stateOverrides,omitempty"`
 }
 
 // DebugTraceCall debug_traceCall wrapper
@@ -75,11 +79,11 @@ func DebugTraceTransaction(
 
 // OverrideAccount similar to ethapi.OverrideAccount
 type OverrideAccount struct {
-	Nonce     *hexutil.Uint64             `json:"nonce,omitempty"`
-	Code      hexutil.Bytes               `json:"code,omitempty"`
-	Balance   *hexutil.Big                `json:"balance,omitempty"`
-	State     map[common.Hash]common.Hash `json:"state,omitempty"`
-	StateDiff map[common.Hash]common.Hash `json:"stateDiff,omitempty"`
+	Nonce     *hexutil.Uint64        `json:"nonce,omitempty"`
+	Code      hexutil.Bytes          `json:"code,omitempty"`
+	Balance   *hexutil.Big           `json:"balance,omitempty"`
+	State     map[common.Hash]string `json:"state,omitempty"`
+	StateDiff map[common.Hash]string `json:"stateDiff,omitempty"`
 }
 
 // StateOverride similar to ethapi.StateOverride
