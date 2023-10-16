@@ -243,8 +243,8 @@ func traceOrGetCachedTransactionCallFrames(rpcClient *rpc.Client, txHashes map[c
 	return callFrames, nil
 }
 
-func extractOrGetCachedTransferScenarios(txs map[common.Hash]*types.Transaction, receipts map[common.Hash]*types.Receipt, callFrames map[common.Hash]*jsonrpc.CallFrame) ([]*classifier.TransferScenario, error) {
-	var scenarios []*classifier.TransferScenario
+func extractOrGetCachedTransferScenarios(txs map[common.Hash]*types.Transaction, receipts map[common.Hash]*types.Receipt, callFrames map[common.Hash]*jsonrpc.CallFrame) ([]*jsonrpc.TransferScenario, error) {
+	var scenarios []*jsonrpc.TransferScenario
 	if _, err := os.Stat("erc20_transfer_scenarios.json"); os.IsNotExist(err) {
 		for txHash, call := range callFrames {
 			blockNumber := receipts[txHash].BlockNumber
@@ -272,7 +272,7 @@ func extractOrGetCachedTransferScenarios(txs map[common.Hash]*types.Transaction,
 						fmt.Printf("params[1] must be *big.Int")
 						return
 					}
-					scenarios = append(scenarios, &classifier.TransferScenario{
+					scenarios = append(scenarios, &jsonrpc.TransferScenario{
 						MsgSender:      c.From,
 						Token:          *c.To,
 						IsTransferFrom: false,
@@ -307,7 +307,7 @@ func extractOrGetCachedTransferScenarios(txs map[common.Hash]*types.Transaction,
 						fmt.Printf("params[2] must be *big.Int")
 						return
 					}
-					scenarios = append(scenarios, &classifier.TransferScenario{
+					scenarios = append(scenarios, &jsonrpc.TransferScenario{
 						MsgSender:      c.From,
 						Token:          *c.To,
 						IsTransferFrom: true,

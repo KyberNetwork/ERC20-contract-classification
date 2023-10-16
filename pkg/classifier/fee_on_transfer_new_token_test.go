@@ -7,10 +7,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/stretchr/testify/require"
-)
 
-const (
-	rpcURL = "http://localhost:8545" // CHANGE ME
+	"erc20-contract-classification/pkg/classifier/jsonrpc"
 )
 
 func bigIntMustFromString(s string) *big.Int {
@@ -22,7 +20,7 @@ func bigIntMustFromString(s string) *big.Int {
 }
 
 type testScenario struct {
-	transfers       []*TransferScenario
+	transfers       []*jsonrpc.TransferScenario
 	isFeeOnTransfer bool
 }
 
@@ -30,7 +28,7 @@ var (
 	testScenarios = map[common.Address]testScenario{
 		// GROWTH token which is FOT
 		common.HexToAddress("0x0c7361B70e8F8530B7c0CcB17EeA89278E670C93"): {
-			transfers: []*TransferScenario{
+			transfers: []*jsonrpc.TransferScenario{
 				{
 					MsgSender: common.HexToAddress("0x2FD45E9c69D50cD08a03792253daC3CA37a81cBf"), // a holder
 					Token:     common.HexToAddress("0x0c7361B70e8F8530B7c0CcB17EeA89278E670C93"),
@@ -42,7 +40,7 @@ var (
 		},
 		// USDT which is not FOT (yet)
 		common.HexToAddress("0xdac17f958d2ee523a2206206994597c13d831ec7"): {
-			transfers: []*TransferScenario{
+			transfers: []*jsonrpc.TransferScenario{
 				{
 					MsgSender: common.HexToAddress("0xBDa23B750dD04F792ad365B5F2a6F1d8593796f2"), // a holder
 					Token:     common.HexToAddress("0xdac17f958d2ee523a2206206994597c13d831ec7"),
