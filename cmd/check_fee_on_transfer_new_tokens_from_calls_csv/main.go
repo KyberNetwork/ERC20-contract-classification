@@ -5,7 +5,8 @@ import (
 	"math/big"
 	"os"
 
-	"erc20-contract-classification/pkg/classifier"
+	"github.com/KyberNetwork/erc20-contract-classification/pkg/classifier"
+	"github.com/KyberNetwork/erc20-contract-classification/pkg/classifier/jsonrpc"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -46,13 +47,13 @@ func main() {
 		panic(err)
 	}
 
-	var scenarios []*classifier.TransferScenario
+	var scenarios []*jsonrpc.TransferScenario
 	for _, call := range transferCalls {
 		blockNumber, _ := new(big.Int).SetString(call.BlockNumber, 0)
 		gasPrice, _ := new(big.Int).SetString(call.GasPrice, 0)
 		gasFeeCap, _ := new(big.Int).SetString(call.MaxFeePerGas, 0)
 		gasTipCap, _ := new(big.Int).SetString(call.MaxPriorityFeePerGas, 0)
-		scenarios = append(scenarios, &classifier.TransferScenario{
+		scenarios = append(scenarios, &jsonrpc.TransferScenario{
 			MsgSender:      call.MsgSender,
 			Token:          call.Token,
 			IsTransferFrom: call.IsTransferFrom,

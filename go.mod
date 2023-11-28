@@ -1,10 +1,11 @@
-module erc20-contract-classification
+module github.com/KyberNetwork/erc20-contract-classification
 
-go 1.20
+go 1.21
 
 require (
 	github.com/ethereum/go-ethereum v1.11.6
 	github.com/gocarina/gocsv v0.0.0-20230616125104-99d496ca653d
+	github.com/sajari/regression v1.0.1
 	github.com/stretchr/testify v1.8.3
 	github.com/tdewolff/minify/v2 v2.12.9
 	go.uber.org/zap v1.24.0
@@ -29,6 +30,7 @@ require (
 	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/crypto v0.1.0 // indirect
 	golang.org/x/sys v0.10.0 // indirect
+	gonum.org/v1/gonum v0.14.0 // indirect
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

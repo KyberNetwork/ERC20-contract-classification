@@ -6,7 +6,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/gocarina/gocsv"
 
-	"erc20-contract-classification/pkg/types"
+	"github.com/KyberNetwork/erc20-contract-classification/pkg/types"
 )
 
 func ReadDataFromCSV(csv_file string, contractAddress common.Address) ([]*types.TxFromTransferEvent, error) {

@@ -10,45 +10,27 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
 
-	"erc20-contract-classification/pkg/classifier/jsonrpc"
-	"erc20-contract-classification/pkg/types"
+	"github.com/KyberNetwork/erc20-contract-classification/pkg/classifier/jsonrpc"
+	"github.com/KyberNetwork/erc20-contract-classification/pkg/types"
 )
 
-type Classifier struct {
+type StorageTraceClassifier struct {
 	probe     *Probe
 	client    *rpc.Client
 	ethClient *ethclient.Client
 }
 
-func NewClassifier(rpcClient *rpc.Client, erc20balanceSlotProbe *Probe) *Classifier {
-	return &Classifier{
+func NewClassifier(rpcClient *rpc.Client, erc20balanceSlotProbe *Probe) *StorageTraceClassifier {
+	return &StorageTraceClassifier{
 		probe:     erc20balanceSlotProbe,
 		client:    rpcClient,
 		ethClient: ethclient.NewClient(rpcClient),
 	}
 }
 
-type BalanceDiff struct {
-	Address common.Address
-	Before  *big.Int
-	After   *big.Int
-}
-
-type StateChanges struct {
-	Contract *BalanceDiff
-	From     *BalanceDiff
-	To       *BalanceDiff
-}
-
-// getTxsWithTransferLog will return a list of tx with transfer log from a contract
-// TODO: wait for data team to provide this
-func getTxsWithTransferLog(contract common.Address) {
-
-}
-
-func (c *Classifier) ReadSlotStorage(txs []*types.TxFromTransferEvent, contractAddr common.Address) (balanceSlot map[common.Address]common.Hash) {
+func (c *StorageTraceClassifier) ReadSlotStorage(txs []*types.TxFromTransferEvent, contractAddr common.Address) (balanceSlot map[common.Address]common.Hash) {
 	var (
-		balanceSlotMap map[common.Address]common.Hash
+		balanceSlotMap = make(map[common.Address]common.Hash)
 	)
 	balanceSlotMap[contractAddr] = common.Hash{}
 
@@ -58,7 +40,7 @@ func (c *Classifier) ReadSlotStorage(txs []*types.TxFromTransferEvent, contractA
 	}
 
 	for address, _ := range balanceSlotMap {
-		slot, err := c.probe.ProbeBalanceSlot(address)
+		slot, err := c.probe.ProbeBalanceSlot(contractAddr, address)
 		if err != nil {
 			logger.Warnw("failed to probe balance slot", "address", address, "error", err)
 			continue
@@ -68,9 +50,16 @@ func (c *Classifier) ReadSlotStorage(txs []*types.TxFromTransferEvent, contractA
 	return balanceSlotMap
 }
 
-func (c *Classifier) TraceCallAndGetBalance(contractAddress common.Address, txs []*types.TxFromTransferEvent, balanceSlotMap map[common.Address]common.Hash) (map[common.Hash]*StateChanges, error) {
+func (c *StorageTraceClassifier) TraceCallAndGetBalance(contractAddress common.Address, txs []*types.TxFromTransferEvent, balanceSlotMap map[common.Address]common.Hash) (map[common.Hash]*types.StateChanges, error) {
 	var (
-		results = make(map[common.Hash]*StateChanges, len(txs))
+		results = make(map[common.Hash]*types.StateChanges, len(txs))
+		tracer  = jsonrpc.DebugTraceCallTracerConfigParam{
+			// we are using the builtin prestateTracer in go-ethereum
+			// https://github.com/ethereum/go-ethereum/blob/master/eth/tracers/native/prestate.go
+			Tracer:         "prestateTracer",
+			TracerConfig:   jsonrpc.TransferTracerConfigEncoded,
+			StateOverrides: nil,
+		}
 	)
 	contract, avail := balanceSlotMap[contractAddress]
 	if !avail {
@@ -90,24 +79,24 @@ func (c *Classifier) TraceCallAndGetBalance(contractAddress common.Address, txs 
 		err := jsonrpc.DebugTraceTransaction(
 			c.client,
 			tx.TxHash,
-			nil,
+			&tracer,
 			opsResult,
 		)
 		if err != nil {
 			logger.Warnw("failed to to call json rpc ")
 		}
-		sd := &StateChanges{
-			Contract: &BalanceDiff{
+		sd := &types.StateChanges{
+			Contract: &types.BalanceDiff{
 				Address: contractAddress,
 				Before:  nil,
 				After:   nil,
 			},
-			From: &BalanceDiff{
+			From: &types.BalanceDiff{
 				Address: tx.From,
 				Before:  nil,
 				After:   nil,
 			},
-			To: &BalanceDiff{
+			To: &types.BalanceDiff{
 				Address: tx.To,
 				Before:  nil,
 				After:   nil,
@@ -123,7 +112,7 @@ func (c *Classifier) TraceCallAndGetBalance(contractAddress common.Address, txs 
 	return results, nil
 }
 
-func extractBalance(opsResult tracingResult, sd *StateChanges, from, to, contract common.Hash) error {
+func extractBalance(opsResult tracingResult, sd *types.StateChanges, from, to, contract common.Hash) error {
 	for _, op := range opsResult.ops {
 		decoded, err := hexutil.Decode(op.Value)
 		if err != nil {
@@ -171,12 +160,13 @@ func extractBalance(opsResult tracingResult, sd *StateChanges, from, to, contrac
 
 	return nil
 }
-func (c *Classifier) IsFeeOnTransfer(ercContract common.Address) {
+
+func (c *StorageTraceClassifier) IsFeeOnTransfer(ercContract common.Address) (bool, error) {
 
 	// filter for transfer tx
 
 	// find slotstorage from & ti
 
 	// trace call get balance before after
-
+	return false, nil
 }

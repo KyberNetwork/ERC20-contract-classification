@@ -19,3 +19,15 @@ type TxFromTransferEvent struct {
 	TxHash common.Hash    `csv:"tx_hash"`
 	Amount *big.Int       `csv:"total_tokens_transferred"`
 }
+
+type BalanceDiff struct {
+	Address common.Address
+	Before  *big.Int
+	After   *big.Int
+}
+
+type StateChanges struct {
+	Contract *BalanceDiff
+	From     *BalanceDiff
+	To       *BalanceDiff
+}

@@ -3,15 +3,15 @@ package classifier
 import (
 	"errors"
 	"math/rand"
-	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/vm"
 	"github.com/ethereum/go-ethereum/rpc"
 
-	"erc20-contract-classification/pkg/classifier/abis"
-	"erc20-contract-classification/pkg/classifier/jsonrpc"
+	"github.com/KyberNetwork/erc20-contract-classification/pkg/classifier/abis"
+	"github.com/KyberNetwork/erc20-contract-classification/pkg/classifier/jsonrpc"
+	"github.com/KyberNetwork/erc20-contract-classification/pkg/utils"
 )
 
 func randomizeHash() common.Hash {
@@ -22,40 +22,29 @@ func randomizeHash() common.Hash {
 	return h
 }
 
-// fix "invalid argument 2: hex number with leading zero digits" error
-func removeLeadingZerosFromHash(h common.Hash) string {
-	return "0x" + strings.TrimLeft(strings.TrimPrefix(h.Hex(), "0x"), "0")
-}
-
 const (
 	gasLimit = "0x7a120"
 )
 
 type Probe struct {
 	rpcClient *rpc.Client
-	wallet    common.Address
 }
 
-func NewProbe(rpcClient *rpc.Client, wallet common.Address) *Probe {
+func NewProbe(rpcClient *rpc.Client) *Probe {
 	return &Probe{
 		rpcClient: rpcClient,
-		wallet:    wallet,
 	}
-}
-
-func (p *Probe) GetWallet() common.Address {
-	return p.wallet
 }
 
 // ProbeBalanceSlot For a ERC20 token and a wallet, find the storage slot of the token that contains the wallet's balance of the token.
 // This approach only works if the ERC20 token's contract reads and writes balances directly from and to a mapping.
-func (p *Probe) ProbeBalanceSlot(token common.Address) (common.Hash, error) {
-	logger.Infof("probing balance slot for wallet %s in token %s\n", p.wallet, token)
+func (p *Probe) ProbeBalanceSlot(token, wallet common.Address) (common.Hash, error) {
+	logger.Infof("probing balance slot for wallet %s in token %s\n", wallet, token)
 
 	/*
 		Step 1: Trace all SLOAD instructions after calling balanceOf(wallet)
 	*/
-	data, err := abis.ERC20.Pack("balanceOf", p.wallet)
+	data, err := abis.ERC20.Pack("balanceOf", wallet)
 	if err != nil {
 		return common.Hash{}, err
 	}
@@ -110,7 +99,7 @@ func (p *Probe) ProbeBalanceSlot(token common.Address) (common.Hash, error) {
 			map[common.Address]jsonrpc.OverrideAccount{
 				token: {
 					StateDiff: map[common.Hash]string{
-						common.HexToHash(sload.Slot): removeLeadingZerosFromHash(testValue),
+						common.HexToHash(sload.Slot): utils.RemoveLeadingZerosFromHash(testValue),
 					},
 				},
 			},

@@ -9,8 +9,8 @@ import (
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/gocarina/gocsv"
 
-	"erc20-contract-classification/pkg/classifier/data"
-	"erc20-contract-classification/pkg/classifier/jsonrpc"
+	"github.com/KyberNetwork/erc20-contract-classification/pkg/classifier/jsonrpc"
+	"github.com/KyberNetwork/erc20-contract-classification/pkg/types"
 )
 
 const (
@@ -31,7 +31,7 @@ func main() {
 	// ethClient := ethclient.NewClient(rpcClient)
 
 	var (
-		transfers []*data.TransferRecord
+		transfers []types.TransferRecord
 		txHashes  = make(map[common.Hash]struct{})
 		// txs        = make(map[common.Hash]*types.Transaction)
 		// receipts   = make(map[common.Hash]*types.Receipt)
