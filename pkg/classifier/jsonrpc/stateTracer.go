@@ -9,8 +9,8 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/rpc"
 
-	"erc20-contract-classification/pkg/classifier/abis"
-	"erc20-contract-classification/pkg/utils"
+	"github.com/KyberNetwork/erc20-contract-classification/pkg/classifier/abis"
+	"github.com/KyberNetwork/erc20-contract-classification/pkg/utils"
 )
 
 type TransferScenario struct {

@@ -2,11 +2,12 @@ package classifier
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math/big"
 
-	"erc20-contract-classification/pkg/classifier/abis"
-	"erc20-contract-classification/pkg/types"
+	"github.com/KyberNetwork/erc20-contract-classification/pkg/classifier/abis"
+	"github.com/KyberNetwork/erc20-contract-classification/pkg/types"
 
 	"github.com/sajari/regression"
 
@@ -31,7 +32,18 @@ func NewEventFiterClassifier(rpcClient *rpc.Client, txsThreshold int, regressR2 
 	}
 }
 
-func (c *EventFilterClassifier) FetchTxAndEvents(contractAddress common.Address) map[common.Hash][]types.TxFromTransferEvent {
+func (c *EventFilterClassifier) IsErc20(contractAddress common.Address, codes []byte) bool {
+	var err error
+	if codes == nil {
+		codes, err = c.ethClient.CodeAt(context.Background(), contractAddress, nil)
+		if err != nil || len(codes) == 0 {
+			return false
+		}
+	}
+	return IsErc20(codes)
+}
+
+func (c *EventFilterClassifier) FetchLogs(contractAddress common.Address) []ethtypes.Log {
 	eventSignature := abis.ERC20.Events["Transfer"].ID
 	blockNumber, err := c.ethClient.BlockNumber(context.Background())
 	if err != nil {
@@ -76,7 +88,10 @@ func (c *EventFilterClassifier) FetchTxAndEvents(contractAddress common.Address)
 		}
 		blockNumber = from
 	}
+	return logs
+}
 
+func (c *EventFilterClassifier) ProcessLogs(logs []ethtypes.Log) map[common.Hash][]types.TxFromTransferEvent {
 	var (
 		txToEventMap = make(map[common.Hash][]types.TxFromTransferEvent, len(logs))
 	)
@@ -121,8 +136,20 @@ type Sender struct {
 // IsFeeOnTransfer implement token classifier for EventFilterClassifier
 // on the rational that the patterns of multiple transfer event transmitted from a certain address
 // in the same tx indicate that fee is being transfered somewhere.
-func (c *EventFilterClassifier) IsFeeOnTransfer(ercContract common.Address) (bool, error) {
-	txsFromEvents := c.FetchTxAndEvents(ercContract)
+func (c *EventFilterClassifier) IsFeeOnTransfer(ercContract common.Address, logs []ethtypes.Log) (FeeOnTransferResult, error) {
+	var falseResult = FeeOnTransferResult{
+		IsFeeOnTransfer: false,
+		FeeReceiver:     common.Address{},
+		Coefficients:    nil,
+		Formular:        "",
+	}
+	if logs == nil || len(logs) == 0 {
+		logs = c.FetchLogs(ercContract)
+	}
+	if logs == nil || len(logs) == 0 {
+		return falseResult, errors.New("there is no logs for processing")
+	}
+	txsFromEvents := c.ProcessLogs(logs)
 	type counter struct {
 		address common.Address
 		count   int
@@ -218,16 +245,21 @@ func (c *EventFilterClassifier) IsFeeOnTransfer(ercContract common.Address) (boo
 	r, err := regress(supposedFeeReceived, supposedRealBenefactory)
 	if err != nil {
 		logger.Infow("cannot regress from data", "error", err)
-		return false, nil
+		return falseResult, nil
 	}
 	if (numTxsWithMultipleTransfer/2 > mostReceved.count) && (numTxsWithMultipleTransfer < 100) {
 		logger.Warnw("Prediction might not be corrected since there is not enough tx")
 	}
 	if r.R2 >= c.RegressR2 {
-		return true, nil
+		return FeeOnTransferResult{
+			IsFeeOnTransfer: true,
+			FeeReceiver:     mostReceved.address,
+			Coefficients:    r.GetCoeffs(),
+			Formular:        r.Formula,
+		}, nil
 	}
 
-	return false, nil
+	return falseResult, nil
 }
 
 func regress(supposedFee []float64, supposedReceived []float64) (*regression.Regression, error) {

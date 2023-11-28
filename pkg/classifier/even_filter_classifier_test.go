@@ -5,55 +5,21 @@ import (
 	"testing"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/stretchr/testify/assert"
-
-	"erc20-contract-classification/pkg/classifier/data"
-	"erc20-contract-classification/pkg/types"
 )
 
 const (
-	rpcURL   = "" // CHANGE ME
-	csv_file = "../../erc20_transfer_tx.csv"
+	rpcURL = "https://bitter-distinguished-pool.quiknode.pro/0857d66be8c205ec410c3fdb91eb0d11c744531e/" // CHANGE ME
 )
 
 var (
 	contractAddress = common.HexToAddress("0x36e6309aa7a923fb111ae50b56bfb3cfb2256f89")
 )
 
-func TestClassifier_TraceCallAndGetBalance(t *testing.T) {
-	//we won't be able to test this unless we got a custom node.
-	t.Skip()
-	type fields struct {
-		probe     *Probe
-		client    *rpc.Client
-		ethClient *ethclient.Client
-	}
-	type args struct {
-		contractAddress common.Address
-		txs             []*types.TxFromTransferEvent
-		balanceSlotMap  map[common.Address]common.Hash
-	}
-
-	rpcClient, err := rpc.Dial(rpcURL)
-	erc20BalanceSlotProbe := NewProbe(rpcClient)
-	c := NewClassifier(rpcClient, erc20BalanceSlotProbe)
-
-	input, err := data.ReadDataFromCSV(csv_file, contractAddress)
-	assert.NoError(t, err)
-	balanceSlotsMap := c.ReadSlotStorage(input, contractAddress)
-	stateChanges, err := c.TraceCallAndGetBalance(contractAddress, input, balanceSlotsMap)
-	assert.NoError(t, err)
-
-	for txHash, sc := range stateChanges {
-		logger.Info("State changes", "tx", txHash, "state change", sc)
-		break
-	}
-}
-
 func TestEventFilterClassifier_FetchTxAndEvents(t *testing.T) {
-
+	// This test is used only for data retrieving
+	t.Skip()
 	type args struct {
 		contractAddress common.Address
 	}
@@ -72,7 +38,8 @@ func TestEventFilterClassifier_FetchTxAndEvents(t *testing.T) {
 	c := NewEventFiterClassifier(rpcClient, 1000, 0.9)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			res := c.FetchTxAndEvents(tt.args.contractAddress)
+			logs := c.FetchLogs(tt.args.contractAddress)
+			res := c.ProcessLogs(logs)
 			for txhash, txs := range res {
 				if len(txs) == 1 {
 					continue
@@ -90,7 +57,7 @@ func TestEventFilterClassifier_FetchTxAndEvents(t *testing.T) {
 }
 
 func TestEventFilterClassifier_IsFeeOnTransfer(t *testing.T) {
-
+	t.Skip("integration test, time and eth client costly")
 	type args struct {
 		ercContract common.Address
 	}
@@ -98,9 +65,11 @@ func TestEventFilterClassifier_IsFeeOnTransfer(t *testing.T) {
 		numTx     = 10000
 		regressR2 = 0.9
 	)
+	var c Classifier
 	rpcClient, err := rpc.Dial(rpcURL)
 	assert.NoError(t, err)
-	c := NewEventFiterClassifier(rpcClient, numTx, regressR2)
+
+	c = NewEventFiterClassifier(rpcClient, numTx, regressR2)
 	tests := []struct {
 		name    string
 		args    args
@@ -133,11 +102,11 @@ func TestEventFilterClassifier_IsFeeOnTransfer(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := c.IsFeeOnTransfer(tt.args.ercContract)
+			got, err := c.IsFeeOnTransfer(tt.args.ercContract, nil)
 			if !tt.wantErr(t, err, fmt.Sprintf("IsFeeOnTransfer(%v)", tt.args.ercContract)) {
 				return
 			}
-			assert.Equalf(t, tt.want, got, "IsFeeOnTransfer(%v)", tt.args.ercContract)
+			assert.Equalf(t, tt.want, got.IsFeeOnTransfer, "IsFeeOnTransfer(%v)", tt.args.ercContract)
 		})
 	}
 }

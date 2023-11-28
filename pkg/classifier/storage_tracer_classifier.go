@@ -9,7 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"go.uber.org/zap"
 
-	"erc20-contract-classification/pkg/classifier/abis"
+	"github.com/KyberNetwork/erc20-contract-classification/pkg/classifier/abis"
 )
 
 var logger *zap.SugaredLogger
@@ -72,7 +72,7 @@ func DisassembleWithTolerance(script []byte) []string {
 	return instrs
 }
 
-func IsErc20(bytecode []byte) (bool) {
+func IsErc20(bytecode []byte) bool {
 
 	data := DisassembleWithTolerance(bytecode)
 

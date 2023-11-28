@@ -9,8 +9,8 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
-	"erc20-contract-classification/pkg/classifier/abis"
-	"erc20-contract-classification/pkg/classifier/jsonrpc"
+	"github.com/KyberNetwork/erc20-contract-classification/pkg/classifier/abis"
+	"github.com/KyberNetwork/erc20-contract-classification/pkg/classifier/jsonrpc"
 )
 
 func (c *StorageTraceClassifier) getActualBalanceReceivedAfterTransfer(scenario *jsonrpc.TransferScenario) (*big.Int, error) {

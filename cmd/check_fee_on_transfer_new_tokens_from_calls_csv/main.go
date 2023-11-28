@@ -5,8 +5,8 @@ import (
 	"math/big"
 	"os"
 
-	"erc20-contract-classification/pkg/classifier"
-	"erc20-contract-classification/pkg/classifier/jsonrpc"
+	"github.com/KyberNetwork/erc20-contract-classification/pkg/classifier"
+	"github.com/KyberNetwork/erc20-contract-classification/pkg/classifier/jsonrpc"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"

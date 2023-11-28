@@ -9,8 +9,8 @@ import (
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/gocarina/gocsv"
 
-	"erc20-contract-classification/pkg/classifier/jsonrpc"
-	"erc20-contract-classification/pkg/types"
+	"github.com/KyberNetwork/erc20-contract-classification/pkg/classifier/jsonrpc"
+	"github.com/KyberNetwork/erc20-contract-classification/pkg/types"
 )
 
 const (

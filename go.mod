@@ -1,6 +1,6 @@
-module erc20-contract-classification
+module github.com/KyberNetwork/erc20-contract-classification
 
-go 1.20
+go 1.21
 
 require (
 	github.com/ethereum/go-ethereum v1.11.6

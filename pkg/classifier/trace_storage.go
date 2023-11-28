@@ -10,8 +10,8 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
 
-	"erc20-contract-classification/pkg/classifier/jsonrpc"
-	"erc20-contract-classification/pkg/types"
+	"github.com/KyberNetwork/erc20-contract-classification/pkg/classifier/jsonrpc"
+	"github.com/KyberNetwork/erc20-contract-classification/pkg/types"
 )
 
 type StorageTraceClassifier struct {
